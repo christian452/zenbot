@@ -1,7 +1,7 @@
-var minimist = require('minimist')
-  , n = require('numbro')
-  , colors = require('colors')
-  , moment = require('moment')
+var minimist = require('minimist'),
+  n = require('numbro'),
+  colors = require('colors'),
+  moment = require('moment')
 
 module.exports = function container (get, set, clear) {
   var c = get('conf')
@@ -10,7 +10,7 @@ module.exports = function container (get, set, clear) {
       .command('balance [selector]')
       .allowUnknownOption()
       .description('get asset and currency balance from the exchange')
-      //.option('--all', 'output all balances')
+      // .option('--all', 'output all balances')
       .option('-c, --calculate_currency <calculate_currency>', 'show the full balance in another currency')
       .option('--debug', 'output detailed debug info')
       .action(function (selector, cmd) {
@@ -42,18 +42,17 @@ module.exports = function container (get, set, clear) {
 
               if (so.calculate_currency) {
                 s.exchange.getQuote({'product_id': s.asset + '-' + so.calculate_currency}, function (err, asset_quote) {
-                  if (err)  throw err
+                  if (err) throw err
 
                   s.exchange.getQuote({'product_id': s.currency + '-' + so.calculate_currency}, function (err, currency_quote) {
-                    if (err)  throw err
+                    if (err) throw err
                     var asset_total = balance.asset * asset_quote.bid
                     var currency_total = balance.currency * currency_quote.bid
                     console.log((so.calculate_currency + ': ').grey + (asset_total + currency_total))
                     process.exit()
                   })
                 })
-              }
-              else {
+              } else {
                 process.exit()
               }
             })

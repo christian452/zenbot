@@ -1,5 +1,5 @@
-var z = require('zero-fill')
-  , n = require('numbro')
+var z = require('zero-fill'),
+  n = require('numbro')
 
 module.exports = function container (get, set, clear) {
   return {
@@ -25,8 +25,7 @@ module.exports = function container (get, set, clear) {
             for (var idx = 0; idx < s.lookback.length; idx++) {
               s.sar_ep = Math.max(s.sar_ep, s.lookback[idx].high)
             }
-          }
-          else {
+          } else {
             s.trend = 'down'
             s.sar = Math.max(s.lookback[1].high, s.lookback[0].high)
             s.sar_ep = s.period.low
@@ -43,8 +42,7 @@ module.exports = function container (get, set, clear) {
       if (typeof s.sar === 'number') {
         if (s.trend === 'up') {
           s.sar = Math.min(s.lookback[1].low, s.lookback[0].low, s.sar + (s.sar_af * (s.sar_ep - s.sar)))
-        }
-        else {
+        } else {
           s.sar = Math.max(s.lookback[1].high, s.lookback[0].high, s.sar - (s.sar_af * (s.sar - s.sar_ep)))
         }
         if (s.trend === 'down') {
@@ -54,23 +52,20 @@ module.exports = function container (get, set, clear) {
             s.sar_ep = s.period.low
             s.sar_af = s.options.sar_af
             s.sar = Math.min(s.lookback[0].low, s.period.low, s.sar + (s.sar_af * (s.sar_ep - s.sar)))
-          }
-          else if (s.period.low < s.sar_ep) {
+          } else if (s.period.low < s.sar_ep) {
             s.sar_ep = s.period.low
             if (s.sar_af < s.options.sar_max_af) {
               s.sar_af += s.options.sar_af
             }
           }
-        }
-        else if (s.trend === 'up') {
+        } else if (s.trend === 'up') {
           if (s.period.low <= s.sar && s.period.close < s.lookback[0].close) {
             s.trend = 'down'
             s.signal = 'sell'
             s.sar_ep = s.period.high
             s.sar_af = s.options.sar_af
             s.sar = Math.max(s.lookback[0].high, s.period.high, s.sar - (s.sar_af * (s.sar - s.sar_ep)))
-          }
-          else if (s.period.high > s.sar_ep) {
+          } else if (s.period.high > s.sar_ep) {
             s.sar_ep = s.period.high
             if (s.sar_af < s.options.sar_max_af) {
               s.sar_af += s.options.sar_af

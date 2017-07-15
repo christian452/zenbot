@@ -1,10 +1,10 @@
-var tb = require('timebucket')
-  , minimist = require('minimist')
-  , n = require('numbro')
-  , fs = require('fs')
-  , path = require('path')
-  , moment = require('moment')
-  , colors = require('colors')
+var tb = require('timebucket'),
+  minimist = require('minimist'),
+  n = require('numbro'),
+  fs = require('fs'),
+  path = require('path'),
+  moment = require('moment'),
+  colors = require('colors')
 
 module.exports = function container (get, set, clear) {
   var c = get('conf')
@@ -106,11 +106,11 @@ module.exports = function container (get, set, clear) {
           s.lookback.unshift(s.period)
           var profit = s.start_capital ? n(s.balance.currency).subtract(s.start_capital).divide(s.start_capital) : n(0)
           output_lines.push('end balance: ' + n(s.balance.currency).format('0.00000000').yellow + ' (' + profit.format('0.00%') + ')')
-          //console.log('start_capital', s.start_capital)
-          //console.log('start_price', n(s.start_price).format('0.00000000'))
-          //console.log('close', n(s.period.close).format('0.00000000'))
+          // console.log('start_capital', s.start_capital)
+          // console.log('start_price', n(s.start_price).format('0.00000000'))
+          // console.log('close', n(s.period.close).format('0.00000000'))
           var buy_hold = s.start_price ? n(s.period.close).multiply(n(s.start_capital).divide(s.start_price)) : n(s.balance.currency)
-          //console.log('buy hold', buy_hold.format('0.00000000'))
+          // console.log('buy hold', buy_hold.format('0.00000000'))
           var buy_hold_profit = s.start_capital ? n(buy_hold).subtract(s.start_capital).divide(s.start_capital) : n(0)
           output_lines.push('buy hold: ' + buy_hold.format('0.00000000').yellow + ' (' + n(buy_hold_profit).format('0.00%') + ')')
           output_lines.push('vs. buy hold: ' + n(s.balance.currency).subtract(buy_hold).divide(buy_hold).format('0.00%').yellow)
@@ -120,8 +120,7 @@ module.exports = function container (get, set, clear) {
           s.my_trades.forEach(function (trade) {
             if (trade.type === 'buy') {
               last_buy = trade.price
-            }
-            else {
+            } else {
               if (last_buy && trade.price < last_buy) {
                 losses++
               }
@@ -155,9 +154,9 @@ module.exports = function container (get, set, clear) {
             .replace('{{code}}', code)
             .replace('{{trend_ema_period}}', so.trend_ema || 36)
             .replace('{{output}}', html_output)
-            .replace(/\{\{symbol\}\}/g,  so.selector + ' - zenbot ' + require('../package.json').version)
+            .replace(/\{\{symbol\}\}/g, so.selector + ' - zenbot ' + require('../package.json').version)
 
-          var out_target = so.filename || 'simulations/sim_result_' + so.selector +'_' + new Date().toISOString().replace(/T/, '_').replace(/\..+/, '').replace(/-/g, '').replace(/:/g, '').replace(/20/, '') + '_UTC.html'
+          var out_target = so.filename || 'simulations/sim_result_' + so.selector + '_' + new Date().toISOString().replace(/T/, '_').replace(/\..+/, '').replace(/-/g, '').replace(/:/g, '').replace(/20/, '') + '_UTC.html'
           fs.writeFileSync(out_target, out)
           console.log('wrote', out_target)
           process.exit(0)
@@ -182,13 +181,11 @@ module.exports = function container (get, set, clear) {
                 opts.query.time['$gte'] = query_start
               }
               opts.sort = {time: -1}
-            }
-            else {
+            } else {
               if (!opts.query.time) opts.query.time = {}
               opts.query.time['$gt'] = cursor
             }
-          }
-          else if (query_start) {
+          } else if (query_start) {
             if (!opts.query.time) opts.query.time = {}
             opts.query.time['$gte'] = query_start
           }

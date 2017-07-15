@@ -1,5 +1,5 @@
-var z = require('zero-fill')
-  , n = require('numbro')
+var z = require('zero-fill'),
+  n = require('numbro')
 
 module.exports = function container (get, set, clear) {
   return {
@@ -31,8 +31,7 @@ module.exports = function container (get, set, clear) {
       }
       if (s.options.neutral_rate === 'auto') {
         get('lib.stddev')(s, 'trend_ema_stddev', 10, 'trend_ema_rate')
-      }
-      else {
+      } else {
         s.period.trend_ema_stddev = s.options.neutral_rate
       }
     },
@@ -55,8 +54,7 @@ module.exports = function container (get, set, clear) {
           s.trend = 'up'
           s.signal = !s.acted_on_trend ? 'buy' : null
           s.cancel_down = false
-        }
-        else if (!s.cancel_down && s.period.trend_ema_rate < (s.period.trend_ema_stddev * -1)) {
+        } else if (!s.cancel_down && s.period.trend_ema_rate < (s.period.trend_ema_stddev * -1)) {
           if (s.trend !== 'down') {
             s.acted_on_trend = false
           }
@@ -73,20 +71,17 @@ module.exports = function container (get, set, clear) {
         var color = 'grey'
         if (s.period.trend_ema_rate > s.period.trend_ema_stddev) {
           color = 'green'
-        }
-        else if (s.period.trend_ema_rate < (s.period.trend_ema_stddev * -1)) {
+        } else if (s.period.trend_ema_rate < (s.period.trend_ema_stddev * -1)) {
           color = 'red'
         }
         cols.push(z(8, n(s.period.trend_ema_rate).format('0.0000'), ' ')[color])
         if (s.period.trend_ema_stddev) {
           cols.push(z(8, n(s.period.trend_ema_stddev).format('0.0000'), ' ').grey)
         }
-      }
-      else {
+      } else {
         if (s.period.trend_ema_stddev) {
           cols.push('                  ')
-        }
-        else {
+        } else {
           cols.push('         ')
         }
       }

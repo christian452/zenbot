@@ -4,42 +4,42 @@ var QuadrigaCX = require('quadrigacx'),
   colors = require('colors'),
   n = require('numbro')
 
-module.exports = function container(get, set, clear) {
+module.exports = function container (get, set, clear) {
   var c = get('conf')
   var shownWarnings = false
 
   var public_client, authed_client
 
-  function publicClient() {
-    if (!public_client) public_client = new QuadrigaCX("1", "", "");
+  function publicClient () {
+    if (!public_client) public_client = new QuadrigaCX('1', '', '')
     return public_client
   }
 
-  function authedClient() {
+  function authedClient () {
     if (!authed_client) {
       if (!c.quadriga || !c.quadriga.key || !c.quadriga.key === 'YOUR-API-KEY') {
         throw new Error('please configure your Quadriga credentials in ' + path.resolve(__dirname, 'conf.js'))
       }
 
-      authed_client = new QuadrigaCX(c.quadriga.client_id, c.quadriga.key, c.quadriga.secret);
+      authed_client = new QuadrigaCX(c.quadriga.client_id, c.quadriga.key, c.quadriga.secret)
     }
     return authed_client
   }
 
-  function joinProduct(product_id) {
+  function joinProduct (product_id) {
     return (product_id.split('-')[0] + '_' + product_id.split('-')[1]).toLowerCase()
   }
 
-  function retry(method, args, error) {
+  function retry (method, args, error) {
     if (error.code === 200) {
       console.error(('\QuadrigaCX API rate limit exceeded! unable to call ' + method + ', aborting').red)
-      return;
+      return
     }
 
     if (method !== 'getTrades') {
       console.error(('\QuadrigaCX API is down! unable to call ' + method + ', retrying in 30s').red)
     }
-    setTimeout(function() {
+    setTimeout(function () {
       exchange[method].apply(exchange, args)
     }, 30000)
   }
@@ -51,11 +51,11 @@ module.exports = function container(get, set, clear) {
     historyScan: 'backward',
     makerFee: 0.5,
 
-    getProducts: function() {
+    getProducts: function () {
       return require('./products.json')
     },
 
-    getTrades: function(opts, cb) {
+    getTrades: function (opts, cb) {
       var func_args = [].slice.call(arguments)
       var args = {
         book: joinProduct(opts.product_id),
@@ -63,17 +63,17 @@ module.exports = function container(get, set, clear) {
       }
 
       var client = publicClient()
-      client.api('transactions', args, function(err, trades) {
+      client.api('transactions', args, function (err, trades) {
         if (!shownWarnings) {
           console.log('please note: the quadriga api does not support backfilling (trade/paper only).')
           console.log('please note: make sure to set the period to 1h')
-          shownWarnings = true;
+          shownWarnings = true
         }
 
         if (err) return retry('getTrades', func_args, err)
         if (trades.error) return retry('getTrades', func_args, trades.error)
 
-        var trades = trades.map(function(trade) {
+        var trades = trades.map(function (trade) {
           return {
             trade_id: trade.tid,
             time: moment.unix(trade.date).valueOf(),
@@ -87,9 +87,9 @@ module.exports = function container(get, set, clear) {
       })
     },
 
-    getBalance: function(opts, cb) {
+    getBalance: function (opts, cb) {
       var client = authedClient()
-      client.api('balance', function(err, wallet) {
+      client.api('balance', function (err, wallet) {
         if (err) return retry('getBalance', null, err)
         if (wallet.error) return retry('getBalance', null, wallet.error)
 
@@ -101,8 +101,8 @@ module.exports = function container(get, set, clear) {
           currency: 0
         }
 
-        balance.currency = wallet[currency + '_balance'];
-        balance.asset = wallet[asset + '_balance'];
+        balance.currency = wallet[currency + '_balance']
+        balance.asset = wallet[asset + '_balance']
 
         balance.currency_hold = wallet[currency + '_reserved']
         balance.asset_hold = wallet[asset + '_reserved']
@@ -110,7 +110,7 @@ module.exports = function container(get, set, clear) {
       })
     },
 
-    getQuote: function(opts, cb) {
+    getQuote: function (opts, cb) {
       var func_args = [].slice.call(arguments)
 
       var params = {
@@ -118,7 +118,7 @@ module.exports = function container(get, set, clear) {
       }
 
       var client = publicClient()
-      client.api('ticker', params, function(err, quote) {
+      client.api('ticker', params, function (err, quote) {
         if (err) return retry('getQuote', func_args, err)
         if (quote.error) return retry('getQuote', func_args, quote.error)
 
@@ -131,21 +131,21 @@ module.exports = function container(get, set, clear) {
       })
     },
 
-    cancelOrder: function(opts, cb) {
+    cancelOrder: function (opts, cb) {
       var func_args = [].slice.call(arguments)
       var params = {
         id: opts.order_id
       }
 
       var client = authedClient()
-      client.api('cancel_order', params, function(err, body) {
+      client.api('cancel_order', params, function (err, body) {
         if (err) return retry('cancelOrder', func_args, err)
         if (body.error) return retry('cancelOrder', func_args, body.error)
         cb()
       })
     },
 
-    buy: function(opts, cb) {
+    buy: function (opts, cb) {
       var params = {
         amount: opts.size,
         book: joinProduct(opts.product_id)
@@ -156,7 +156,7 @@ module.exports = function container(get, set, clear) {
       }
 
       var client = authedClient()
-      client.api('buy', params, function(err, body) {
+      client.api('buy', params, function (err, body) {
         var order = {
           id: null,
           status: 'open',
@@ -172,7 +172,7 @@ module.exports = function container(get, set, clear) {
 
         if (opts.order_type === 'taker') {
           order.status = 'done'
-          order.done_at = new Date().getTime();
+          order.done_at = new Date().getTime()
 
           if (body.orders_matched) {
             var asset_total = 0
@@ -197,7 +197,7 @@ module.exports = function container(get, set, clear) {
       })
     },
 
-    sell: function(opts, cb) {
+    sell: function (opts, cb) {
       var params = {
         amount: opts.size,
         book: joinProduct(opts.product_id)
@@ -208,7 +208,7 @@ module.exports = function container(get, set, clear) {
       }
 
       var client = authedClient()
-      client.api('sell', params, function(err, body) {
+      client.api('sell', params, function (err, body) {
         var order = {
           id: null,
           status: 'open',
@@ -224,7 +224,7 @@ module.exports = function container(get, set, clear) {
 
         if (opts.order_type === 'taker') {
           order.status = 'done'
-          order.done_at = new Date().getTime();
+          order.done_at = new Date().getTime()
 
           if (body.orders_matched) {
             var asset_total = 0
@@ -249,14 +249,14 @@ module.exports = function container(get, set, clear) {
       })
     },
 
-    getOrder: function(opts, cb) {
+    getOrder: function (opts, cb) {
       var order = orders['~' + opts.order_id]
       var params = {
         id: opts.order_id
       }
 
       var client = authedClient()
-      client.api('lookup_order', params, function(err, body) {
+      client.api('lookup_order', params, function (err, body) {
         if (err) return cb(err)
         if (body.error) return cb(body.error.message)
 
@@ -271,7 +271,7 @@ module.exports = function container(get, set, clear) {
     },
 
     // return the property used for range querying.
-    getCursor: function(trade) {
+    getCursor: function (trade) {
       return trade.time
     }
   }

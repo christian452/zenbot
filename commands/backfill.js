@@ -1,7 +1,7 @@
-var tb = require('timebucket')
-  , n = require('numbro')
-  , parallel = require('run-parallel')
-  , crypto = require('crypto')
+var tb = require('timebucket'),
+  n = require('numbro'),
+  parallel = require('run-parallel'),
+  crypto = require('crypto')
 
 module.exports = function container (get, set, clear) {
   var c = get('conf') || {}
@@ -43,8 +43,7 @@ module.exports = function container (get, set, clear) {
         }
         if (mode === 'backward') {
           target_time = new Date().getTime() - (86400000 * cmd.days)
-        }
-        else {
+        } else {
           target_time = new Date().getTime()
           start_time = new Date().getTime() - (86400000 * cmd.days)
         }
@@ -54,8 +53,7 @@ module.exports = function container (get, set, clear) {
             if (mode === 'backward') {
               if (a.to > b.to) return -1
               if (a.to < b.to) return 1
-            }
-            else {
+            } else {
               if (a.from < b.from) return -1
               if (a.from > b.from) return 1
             }
@@ -66,8 +64,7 @@ module.exports = function container (get, set, clear) {
             var opts = {product_id: product_id}
             if (mode === 'backward') {
               opts.to = marker.from
-            }
-            else {
+            } else {
               if (marker.to) opts.from = marker.to + 1
               else opts.from = exchange.getCursor(start_time)
             }
@@ -88,13 +85,11 @@ module.exports = function container (get, set, clear) {
                 if (trade_counter) {
                   console.log('\ndownload complete!\n')
                   process.exit(0)
-                }
-                else {
+                } else {
                   console.error('\ngetTrades() returned no trades, --start may be too remotely in the past.')
                   process.exit(1)
                 }
-              }
-              else if (!trades.length) {
+              } else if (!trades.length) {
                 console.log('\ngetTrades() returned no trades, we may have exhausted the historical data range.')
                 process.exit(0)
               }
@@ -102,8 +97,7 @@ module.exports = function container (get, set, clear) {
                 if (mode === 'backward') {
                   if (a.time > b.time) return -1
                   if (a.time < b.time) return 1
-                }
-                else {
+                } else {
                   if (a.time < b.time) return -1
                   if (a.time > b.time) return 1
                 }
@@ -136,8 +130,7 @@ module.exports = function container (get, set, clear) {
                     if (mode === 'backward' && marker.id !== other_marker.id && marker.from <= other_marker.to && marker.from > other_marker.from) {
                       marker.from = other_marker.from
                       marker.oldest_time = other_marker.oldest_time
-                    }
-                    else if (mode !== 'backward' && marker.id !== other_marker.id && marker.to >= other_marker.from && marker.to < other_marker.to) {
+                    } else if (mode !== 'backward' && marker.id !== other_marker.id && marker.to >= other_marker.from && marker.to < other_marker.to) {
                       marker.to = other_marker.to
                       marker.newest_time = other_marker.newest_time
                     }
@@ -145,8 +138,7 @@ module.exports = function container (get, set, clear) {
                   if (oldest_time !== marker.oldest_time) {
                     var diff = tb(oldest_time - marker.oldest_time).resize('1h').value
                     console.log('\nskipping ' + diff + ' hrs of previously collected data')
-                  }
-                  else if (newest_time !== marker.newest_time) {
+                  } else if (newest_time !== marker.newest_time) {
                     var diff = tb(marker.newest_time - newest_time).resize('1h').value
                     console.log('\nskipping ' + diff + ' hrs of previously collected data')
                   }
@@ -159,8 +151,7 @@ module.exports = function container (get, set, clear) {
                       console.log('\n' + selector, 'saved', day_trade_counter, 'trades', current_days_left, 'days left')
                       day_trade_counter = 0
                       days_left = current_days_left
-                    }
-                    else {
+                    } else {
                       process.stdout.write('.')
                     }
                     if (mode === 'backward' && marker.oldest_time <= target_time) {
@@ -190,8 +181,7 @@ module.exports = function container (get, set, clear) {
               }
               marker.from = marker.from ? Math.min(marker.from, cursor) : cursor
               marker.oldest_time = Math.min(marker.oldest_time, trade.time)
-            }
-            else {
+            } else {
               if (!marker.from) {
                 marker.from = cursor
                 marker.oldest_time = trade.time

@@ -1,5 +1,5 @@
-let z = require('zero-fill')
-  , n = require('numbro')
+let z = require('zero-fill'),
+  n = require('numbro')
 
 module.exports = function container (get, set, clear) {
   return {
@@ -9,7 +9,7 @@ module.exports = function container (get, set, clear) {
     getOptions: function () {
       this.option('period', 'period length', String, '20m')
       this.option('min_periods', 'min. number of history periods', Number, 50)
-      //this.option('ema_acc', 'sideways threshold (0.2-0.4)', Number, 0.3)
+      // this.option('ema_acc', 'sideways threshold (0.2-0.4)', Number, 0.3)
       this.option('cci_periods', 'number of RSI periods', Number, 12)
       this.option('rsi_periods', 'number of RSI periods', Number, 14)
       this.option('srsi_periods', 'number of RSI periods', Number, 9)
@@ -20,14 +20,13 @@ module.exports = function container (get, set, clear) {
       this.option('oversold_cci', 'buy when CCI reaches or drops below this value', Number, -90)
       this.option('overbought_cci', 'sell when CCI reaches or goes above this value', Number, 140)
       this.option('constant', 'constant', Number, 0.015)
-      console.log('If you have questions about this strategy, contact me... @talvasconcelos');
+      console.log('If you have questions about this strategy, contact me... @talvasconcelos')
     },
 
     calculate: function (s) {
-      //get market trend
+      // get market trend
       get('lib.ema')(s, 'trend_ema', s.options.min_periods)
-      if (typeof s.period.trend_ema !== 'undefined')
-        s.trend = s.period.trend_ema > s.lookback[0].trend_ema ? 'up' : 'down'
+      if (typeof s.period.trend_ema !== 'undefined') { s.trend = s.period.trend_ema > s.lookback[0].trend_ema ? 'up' : 'down' }
 
 		  // compute Stochastic RSI
 		  get('lib.srsi')(s, 'srsi', s.options.rsi_periods, s.options.srsi_k, s.options.srsi_d)
@@ -39,24 +38,23 @@ module.exports = function container (get, set, clear) {
         s.cci_fromAbove = s.period.cci < s.lookback[0]['cci']
         s.rsi_fromAbove = s.period.srsi_K < s.lookback[0]['srsi_K']
       }
-
     },
 
     onPeriod: function (s, cb) {
     	if (!s.in_preroll && typeof s.trend !== 'undefined') {
         // Buy signal
-        if (s.trend === 'up'/* || s.period.acc < s.options.ema_acc*/) {
-        	if (s.period.cci <= s.options.oversold_cci && /*s.period.srsi_K > s.period.srsi_D &&*/ s.period.srsi_K <= s.options.oversold_rsi) {
+        if (s.trend === 'up'/* || s.period.acc < s.options.ema_acc */) {
+        	if (s.period.cci <= s.options.oversold_cci && /* s.period.srsi_K > s.period.srsi_D && */ s.period.srsi_K <= s.options.oversold_rsi) {
   				  if (!s.cci_fromAbove && !s.rsi_fromAbove) {
               s.signal = 'buy'
             }
           }
         }
 			  // Sell signal
-        if (s.trend === 'down'/* || s.period.acc < s.options.ema_acc*/) {
-          if (s.period.cci >= s.options.overbought_cci && /*s.period.srsi_K < s.period.srsi_D &&*/ s.period.srsi_K >= s.options.overbought_rsi) {
+        if (s.trend === 'down'/* || s.period.acc < s.options.ema_acc */) {
+          if (s.period.cci >= s.options.overbought_cci && /* s.period.srsi_K < s.period.srsi_D && */ s.period.srsi_K >= s.options.overbought_rsi) {
             if (s.cci_fromAbove && s.rsi_fromAbove) {
-                s.signal = 'sell'
+              s.signal = 'sell'
             }
           }
         }
@@ -69,18 +67,16 @@ module.exports = function container (get, set, clear) {
         var color = 'grey'
         if (s.period.cci > 0) {
           color = 'green'
-        }
-        else if (s.period.cci < 0) {
+        } else if (s.period.cci < 0) {
           color = 'red'
         }
         cols.push(z(8, n(s.period.cci).format('000'), ' ')[color])
         cols.push(z(8, n(s.period.srsi_K).format('000'), ' ')[color])
-      }
-      else {
+      } else {
         cols.push('         ')
       }
       return cols
     }
-	}
+  }
 }
-/* Made by talvasconcelos*/
+/* Made by talvasconcelos */

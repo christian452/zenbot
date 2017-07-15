@@ -1,5 +1,5 @@
-var z = require('zero-fill')
-  , n = require('numbro')
+var z = require('zero-fill'),
+  n = require('numbro')
 
 module.exports = function container (get, set, clear) {
   return {
@@ -31,8 +31,7 @@ module.exports = function container (get, set, clear) {
           }
           s.trend = 'up'
           s.signal = !s.acted_on_trend ? 'buy' : null
-        }
-        else if (s.period.speed <= s.period.baseline * s.options.trigger_factor * -1) {
+        } else if (s.period.speed <= s.period.baseline * s.options.trigger_factor * -1) {
           if (s.trend !== 'down') {
             s.acted_on_trend = false
           }

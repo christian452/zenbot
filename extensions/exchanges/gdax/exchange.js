@@ -1,7 +1,7 @@
-var Gdax = require('gdax')
-  , path = require('path')
-  , colors = require('colors')
-  , numbro = require('numbro')
+var Gdax = require('gdax'),
+  path = require('path'),
+  colors = require('colors'),
+  numbro = require('numbro')
 
 module.exports = function container (get, set, clear) {
   var c = get('conf')
@@ -64,8 +64,7 @@ module.exports = function container (get, set, clear) {
       if (opts.from) {
         // move cursor into the future
         args.before = opts.from
-      }
-      else if (opts.to) {
+      } else if (opts.to) {
         // move cursor into the past
         args.after = opts.to
       }
@@ -97,8 +96,7 @@ module.exports = function container (get, set, clear) {
           if (account.currency === opts.currency) {
             balance.currency = account.balance
             balance.currency_hold = account.hold
-          }
-          else if (account.currency === opts.asset) {
+          } else if (account.currency === opts.asset) {
             balance.asset = account.balance
             balance.asset_hold = account.hold
           }

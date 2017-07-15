@@ -1,5 +1,5 @@
-var z = require('zero-fill')
-  , n = require('numbro')
+var z = require('zero-fill'),
+  n = require('numbro')
 
 module.exports = function container (get, set, clear) {
   return {
@@ -53,11 +53,11 @@ module.exports = function container (get, set, clear) {
 
       if (typeof s.period.macd_histogram === 'number' && typeof s.lookback[0].macd_histogram === 'number') {
         if ((s.period.macd_histogram - s.options.up_trend_threshold) > 0 && (s.lookback[0].macd_histogram - s.options.up_trend_threshold) <= 0) {
-          s.signal = 'buy';
+          s.signal = 'buy'
         } else if ((s.period.macd_histogram + s.options.down_trend_threshold) < 0 && (s.lookback[0].macd_histogram + s.options.down_trend_threshold) >= 0) {
-          s.signal = 'sell';
+          s.signal = 'sell'
         } else {
-          s.signal = null;  // hold
+          s.signal = null // hold
         }
       }
       cb()
@@ -69,14 +69,12 @@ module.exports = function container (get, set, clear) {
         var color = 'grey'
         if (s.period.macd_histogram > 0) {
           color = 'green'
-        }
-        else if (s.period.macd_histogram < 0) {
+        } else if (s.period.macd_histogram < 0) {
           color = 'red'
         }
         cols.push(z(8, n(s.period.macd_histogram).format('+00.0000'), ' ')[color])
         cols.push(z(8, n(s.period.overbought_rsi).format('00'), ' ').cyan)
-      }
-      else {
+      } else {
         cols.push('         ')
       }
       return cols

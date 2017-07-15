@@ -1,5 +1,5 @@
-var z = require('zero-fill')
-  , n = require('numbro')
+var z = require('zero-fill'),
+  n = require('numbro')
 
 module.exports = function container (get, set, clear) {
   return {

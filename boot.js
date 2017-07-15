@@ -1,12 +1,11 @@
-var glob = require('glob')
-  , path = require('path')
+var glob = require('glob'),
+  path = require('path')
 
 module.exports = function (cb) {
   var zenbot = require('./')()
   try {
     var c = require('./conf')
-  }
-  catch (e) {
+  } catch (e) {
     c = {}
   }
   var defaults = require('./conf-sample')
@@ -18,12 +17,12 @@ module.exports = function (cb) {
   zenbot.set('@zenbot:conf', c)
 
   function withMongo () {
-    //searches all directorys in {workingdir}/extensions/ for files called '_codemap.js'
+    // searches all directorys in {workingdir}/extensions/ for files called '_codemap.js'
     glob('extensions/**/_codemap.js', {cwd: __dirname, absolute: true}, function (err, results) {
       if (err) return cb(err)
       results.forEach(function (result) {
-        var ext = require(result) //load the _codemap for the extension
-        zenbot.use(ext)           //load the extension into zenbot
+        var ext = require(result) // load the _codemap for the extension
+        zenbot.use(ext) // load the extension into zenbot
       })
       cb(null, zenbot)
     })
@@ -45,8 +44,7 @@ module.exports = function (cb) {
         }
         withMongo()
       })
-    }
-    else {
+    } else {
       withMongo()
     }
   })

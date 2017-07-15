@@ -8,8 +8,7 @@ client.getOrder(order_id, function (err, resp, body) {
   if (err) console.error(err)
   else if (resp.statusCode === 404) {
     console.error('NotFound')
-  }
-  else {
+  } else {
     console.log(body)
   }
 })

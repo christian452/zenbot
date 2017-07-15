@@ -1,6 +1,6 @@
-var minimist = require('minimist')
-  , n = require('numbro')
-  , colors = require('colors')
+var minimist = require('minimist'),
+  n = require('numbro'),
+  colors = require('colors')
 
 module.exports = function container (get, set, clear) {
   var c = get('conf')
@@ -29,7 +29,7 @@ module.exports = function container (get, set, clear) {
         so.buy_pct = cmd.pct
         so.selector = get('lib.normalize-selector')(selector || c.selector)
         var order_types = ['maker', 'taker']
-        if (!so.order_type in order_types || !so.order_type) {
+        if (!(so.order_type in order_types) || !so.order_type) {
           so.order_type = 'maker'
         }
         so.mode = 'live'
@@ -54,8 +54,7 @@ module.exports = function container (get, set, clear) {
               }
               console.log('order status: '.grey + s.api_order.status.green + ', bid: '.grey + n(s.api_order.price).format('0.00000000').yellow + ', '.grey + n(quote.bid).subtract(s.api_order.price).format('0.00000000').red + ' below best bid, '.grey + n(s.api_order.filled_size).divide(s.api_order.size).format('0.0%').green + ' filled'.grey)
             })
-          }
-          else {
+          } else {
             console.log('placing order...')
           }
         }

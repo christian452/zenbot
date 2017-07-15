@@ -5,7 +5,7 @@ var KrakenClient = require('kraken-api'),
   n = require('numbro'),
   colors = require('colors')
 
-module.exports = function container(get, set, clear) {
+module.exports = function container (get, set, clear) {
   var c = get('conf')
   var s = {options: minimist(process.argv)}
   var so = s.options
@@ -15,14 +15,14 @@ module.exports = function container(get, set, clear) {
   var recoverableErrors = new RegExp(/(ESOCKETTIMEDOUT|ETIMEDOUT|ECONNRESET|ECONNREFUSED|ENOTFOUND|API:Invalid nonce|between Cloudflare and the origin web server)/)
   var silencedRecoverableErrors = new RegExp(/(ESOCKETTIMEDOUT|ETIMEDOUT)/)
 
-  function publicClient() {
+  function publicClient () {
     if (!public_client) {
       public_client = new KrakenClient()
     }
     return public_client
   }
 
-  function authedClient() {
+  function authedClient () {
     if (!authed_client) {
       if (!c.kraken || !c.kraken.key || c.kraken.key === 'YOUR-API-KEY') {
         throw new Error('please configure your Kraken credentials in conf.js')
@@ -32,11 +32,11 @@ module.exports = function container(get, set, clear) {
     return authed_client
   }
 
-  function joinProduct(product_id) {
+  function joinProduct (product_id) {
     return product_id.split('-')[0] + product_id.split('-')[1]
   }
 
-  function retry(method, args, error) {
+  function retry (method, args, error) {
     if (error.message.match(/API:Rate limit exceeded/)) {
       var timeout = 10000
     } else {
@@ -163,7 +163,7 @@ module.exports = function container(get, set, clear) {
         }
         cb(null, {
           bid: data.result[pair].b[0],
-          ask: data.result[pair].a[0],
+          ask: data.result[pair].a[0]
         })
       })
     },
@@ -186,7 +186,7 @@ module.exports = function container(get, set, clear) {
           return cb(data.error.join(','))
         }
         if (so.debug) {
-          console.log("cancelOrder")
+          console.log('cancelOrder')
           console.log(data)
         }
         cb(error)
@@ -210,7 +210,7 @@ module.exports = function container(get, set, clear) {
         params.price = opts.price
       }
       if (so.debug) {
-        console.log("trade")
+        console.log('trade')
         console.log(params)
       }
       client.api('AddOrder', params, function (error, data) {
@@ -232,11 +232,11 @@ module.exports = function container(get, set, clear) {
         }
 
         if (so.debug) {
-          console.log("Data")
+          console.log('Data')
           console.log(data)
-          console.log("Order")
+          console.log('Order')
           console.log(order)
-          console.log("Error")
+          console.log('Error')
           console.log(error)
         }
 
@@ -294,7 +294,7 @@ module.exports = function container(get, set, clear) {
         }
         var orderData = data.result[params.txid]
         if (so.debug) {
-          console.log("QueryOrders")
+          console.log('QueryOrders')
           console.log(orderData)
         }
 

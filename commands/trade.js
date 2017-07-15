@@ -1,12 +1,12 @@
-var tb = require('timebucket')
-  , minimist = require('minimist')
-  , n = require('numbro')
-  , fs = require('fs')
-  , path = require('path')
-  , spawn = require('child_process').spawn
-  , moment = require('moment')
-  , crypto = require('crypto')
-  , readline = require('readline')
+var tb = require('timebucket'),
+  minimist = require('minimist'),
+  n = require('numbro'),
+  fs = require('fs'),
+  path = require('path'),
+  spawn = require('child_process').spawn,
+  moment = require('moment'),
+  crypto = require('crypto'),
+  readline = require('readline')
 
 module.exports = function container (get, set, clear) {
   var c = get('conf')
@@ -69,7 +69,7 @@ module.exports = function container (get, set, clear) {
         var engine = get('lib.engine')(s)
 
         var order_types = ['maker', 'taker']
-        if (!so.order_type in order_types || !so.order_type) {
+        if (!(so.order_type in order_types) || !so.order_type) {
           so.order_type = 'maker'
         }
 
@@ -114,8 +114,7 @@ module.exports = function container (get, set, clear) {
             }
             if (db_cursor) {
               opts.query.time = {$gt: db_cursor}
-            }
-            else {
+            } else {
               opts.query.time = {$gte: query_start}
             }
             get('db.trades').select(opts, function (err, trades) {
@@ -156,27 +155,21 @@ module.exports = function container (get, set, clear) {
                     readline.emitKeypressEvents(process.stdin)
                     process.stdin.setRawMode(true)
                     process.stdin.on('keypress', function (key, info) {
-                      if (key === 'b' && !info.ctrl ) {
+                      if (key === 'b' && !info.ctrl) {
                         engine.executeSignal('buy')
-                      }
-                      else if (key === 'B' && !info.ctrl) {
+                      } else if (key === 'B' && !info.ctrl) {
                         engine.executeSignal('buy', null, null, false, true)
-                      }
-                      else if (key === 's' && !info.ctrl) {
+                      } else if (key === 's' && !info.ctrl) {
                         engine.executeSignal('sell')
-                      }
-                      else if (key === 'S' && !info.ctrl) {
+                      } else if (key === 'S' && !info.ctrl) {
                         engine.executeSignal('sell', null, null, false, true)
-                      }
-                      else if ((key === 'c' || key === 'C') && !info.ctrl) {
+                      } else if ((key === 'c' || key === 'C') && !info.ctrl) {
                         delete s.buy_order
                         delete s.sell_order
-                      }
-                      else if ((key === 'm' || key === 'M') && !info.ctrl) {
+                      } else if ((key === 'm' || key === 'M') && !info.ctrl) {
                         so.manual = !so.manual
                         console.log('\nmanual mode: ' + (so.manual ? 'ON' : 'OFF') + '\n')
-                      }
-                      else if (info.name === 'c' && info.ctrl) {
+                      } else if (info.name === 'c' && info.ctrl) {
                         // @todo: cancel open orders before exit
                         console.log()
                         process.exit()
@@ -226,7 +219,7 @@ module.exports = function container (get, set, clear) {
                   asset: s.balance.asset,
                   price: s.period.close,
                   start_capital: session.orig_capital,
-                  start_price: session.orig_price,
+                  start_price: session.orig_price
                 }
                 b.consolidated = n(s.balance.asset).multiply(s.period.close).add(s.balance.currency).value()
                 b.profit = (b.consolidated - session.orig_capital) / session.orig_capital
@@ -242,8 +235,7 @@ module.exports = function container (get, set, clear) {
                   })
                 }
                 session.balance = b
-              }
-              else {
+              } else {
                 session.balance = {
                   currency: s.balance.currency,
                   asset: s.balance.asset
@@ -266,14 +258,12 @@ module.exports = function container (get, set, clear) {
                   console.error('\n' + moment().format('YYYY-MM-DD HH:mm:ss') + ' - getTrades request timed out. retrying...')
                 }
                 prev_timeout = true
-              }
-              else if (err.code === 'HTTP_STATUS') {
+              } else if (err.code === 'HTTP_STATUS') {
                 if (prev_timeout) {
                   console.error('\n' + moment().format('YYYY-MM-DD HH:mm:ss') + ' - getTrades request failed: ' + err.message + '. retrying...')
                 }
                 prev_timeout = true
-              }
-              else {
+              } else {
                 console.error('\n' + moment().format('YYYY-MM-DD HH:mm:ss') + ' - getTrades request failed. retrying...')
                 console.error(err)
               }
@@ -339,8 +329,7 @@ module.exports = function container (get, set, clear) {
                 }
                 saveSession()
               })
-            }
-            else {
+            } else {
               saveSession()
             }
           })

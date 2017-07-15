@@ -13,9 +13,9 @@ if (semver.gt('6.0.0', versions.node)) {
   process.exit(1)
 }
 
-var fs = require('fs')
-  , path = require('path')
-  , boot = require('./boot')
+var fs = require('fs'),
+  path = require('path'),
+  boot = require('./boot')
 
 boot(function (err, zenbot) {
   var command_name = process.argv[2]
@@ -30,8 +30,7 @@ boot(function (err, zenbot) {
   try {
     zenbot.get('zenbot:commands.' + command_name)
     command_found = true
-  }
-  catch (e) {
+  } catch (e) {
   }
   if (!command_name || !command_found && (!process.argv[2] || !process.argv[2].match(/^-V|--version$/))) {
     program.help()

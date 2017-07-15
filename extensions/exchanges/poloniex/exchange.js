@@ -1,8 +1,8 @@
-var Poloniex = require('poloniex.js')
-  , path = require('path')
-  , moment = require('moment')
-  , n = require('numbro')
-  , colors = require('colors')
+var Poloniex = require('poloniex.js'),
+  path = require('path'),
+  moment = require('moment'),
+  n = require('numbro'),
+  colors = require('colors')
 
 module.exports = function container (get, set, clear) {
   var c = get('conf')
@@ -64,8 +64,7 @@ module.exports = function container (get, set, clear) {
       if (args.start && !args.end) {
         // add 2 hours
         args.end = args.start + 7200
-      }
-      else if (args.end && !args.start) {
+      } else if (args.end && !args.start) {
         // subtract 2 hours
         args.start = args.end - 7200
       }
@@ -138,7 +137,7 @@ module.exports = function container (get, set, clear) {
         if (quote.isFrozen == '1') console.error('\nwarning: product ' + product_id + ' is frozen')
         cb(null, {
           bid: quote.highestBid,
-          ask: quote.lowestAsk,
+          ask: quote.lowestAsk
         })
       })
     },
@@ -187,8 +186,7 @@ module.exports = function container (get, set, clear) {
           order.status = 'rejected'
           order.reject_reason = 'post only'
           return cb(null, order)
-        }
-        else if (result && result.error && result.error.match(/^Not enough/)) {
+        } else if (result && result.error && result.error.match(/^Not enough/)) {
           order.status = 'rejected'
           order.reject_reason = 'balance'
           return cb(null, order)
@@ -228,8 +226,7 @@ module.exports = function container (get, set, clear) {
         if (!body.forEach) {
           console.error('\nreturnOpenOrders odd result:')
           console.error(body)
-        }
-        else {
+        } else {
           body.forEach(function (api_order) {
             if (api_order.orderNumber == opts.order_id) active = true
           })
