@@ -117,8 +117,7 @@ module.exports = function container (get, set, clear) {
     cancelOrder: function (opts, cb) {
       var client = authedClient()
       client.cancel_order(opts.order_id, function (err, body) {
-        if (err) return (err)
-        cb()
+        cb(err)
       })
     },
 
