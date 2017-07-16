@@ -1,7 +1,6 @@
 var tb = require('timebucket'),
   minimist = require('minimist'),
   n = require('numbro'),
-  fs = require('fs'),
   path = require('path'),
   spawn = require('child_process').spawn,
   moment = require('moment'),
