@@ -62,12 +62,12 @@ const objectProduct = obj => {
   const keys = Object.keys(obj)
   const values = keys.map(function (x) { return obj[x] })
 
-  return product(values).map(function (p) {
-    const e = {}
-    keys.forEach(function (k, n) { e[k] = p[n] })
-    return e
-  })
-}
+  return product(values).map(function(p) {
+    var e = {};
+    keys.forEach(function(k, n) { e[k] = p[n] });
+    return e;
+  });
+};
 
 const processOutput = output => {
   const jsonRegexp = /(\{[\s\S]*?\})\send balance/g
