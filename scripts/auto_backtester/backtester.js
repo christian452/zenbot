@@ -69,7 +69,7 @@ const objectProduct = obj => {
   });
 };
 
-const processOutput = output => {
+const processOutput = (output, command) => {
   const jsonRegexp = /(\{[\s\S]*?\})\send balance/g
   const endBalRegexp = /end balance: (\d+\.\d+) \(/g
   const buyHoldRegexp = /buy hold: (\d+\.\d+) \(/g
@@ -96,6 +96,7 @@ const processOutput = output => {
   )
 
   return {
+    command: command,
     params: rawParams.replace(/[\r\n]/g, ''),
     endBalance: parseFloat(endBalance),
     buyHold: parseFloat(buyHold),
@@ -261,8 +262,8 @@ parallel(tasks, PARALLEL_LIMIT, (err, results) => {
   })
   results.sort((a, b) => (a.roi < b.roi) ? 1 : ((b.roi < a.roi) ? -1 : 0))
   const fileName = `backtesting_${strategyName}_${Math.round(+new Date() / 1000)}.csv`
-  const fieldsGeneral = ['roi', 'vsBuyHold', 'errorRate', 'wlRatio', 'frequency', 'endBalance', 'buyHold', 'wins', 'losses', 'period', 'min_periods', 'days']
-  const fieldNamesGeneral = ['ROI (%)', 'VS Buy Hold (%)', 'Error Rate (%)', 'Win/Loss Ratio', '# Trades/Day', 'Ending Balance ($)', 'Buy Hold ($)', '# Wins', '# Losses', 'Period', 'Min Periods', '# Days']
+  const fieldsGeneral = ['roi', 'vsBuyHold', 'errorRate', 'wlRatio', 'frequency', 'endBalance', 'buyHold', 'wins', 'losses', 'period', 'min_periods', 'days', 'command', 'params']
+  const fieldNamesGeneral = ['ROI (%)', 'VS Buy Hold (%)', 'Error Rate (%)', 'Win/Loss Ratio', '# Trades/Day', 'Ending Balance ($)', 'Buy Hold ($)', '# Wins', '# Losses', 'Period', 'Min Periods', '# Days', 'Command', 'Params']
   /* const fields = {
     cci_srsi: filedsGeneral.concat(['cciPeriods', 'rsiPeriods', 'srsiPeriods', 'srsiK', 'srsiD', 'oversoldRsi', 'overboughtRsi', 'oversoldCci', 'overboughtCci', 'Constant', 'params']),
     srsi_macd: filedsGeneral.concat(['rsiPeriods', 'srsiPeriods', 'srsiK', 'srsiD', 'oversoldRsi', 'overboughtRsi', 'emaShortPeriod', 'emaLongPeriod', 'signalPeriod', 'upTrendThreshold', 'downTrendThreshold', 'params']),
@@ -321,6 +322,6 @@ function runCommand (strategy, strategyId, cb) {
       console.error(stderr)
       return cb(null, null)
     }
-    cb(null, processOutput(stdout))
+    cb(null, processOutput(stdout, command))
   })
 }

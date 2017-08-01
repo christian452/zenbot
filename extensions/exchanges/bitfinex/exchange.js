@@ -8,6 +8,7 @@ module.exports = function container (get, set, clear) {
 
   var public_client, authed_client
 
+
   function publicClient () {
     if (!public_client) public_client = new BFX(null, null, {version: 2, transform: true}).rest
     return public_client
@@ -72,7 +73,7 @@ module.exports = function container (get, set, clear) {
       var query = encodeQueryData(args)
       var pair = 't' + joinProduct(opts.product_id)
       client.makePublicRequest('trades/' + pair + '/hist?' + query, function (err, body) {
-        if (err) return retry('getTrades', func_args, err)
+        if (err) return retry('getTrades', func_args)
         var trades = body.map(function (trade) {
           return {
             trade_id: trade.ID,
@@ -87,6 +88,7 @@ module.exports = function container (get, set, clear) {
     },
 
     getBalance: function (opts, cb) {
+      var func_args = [].slice.call(arguments)
       var client = authedClient()
       client.wallet_balances(function (err, body) {
         if (err) return (err)
@@ -109,19 +111,22 @@ module.exports = function container (get, set, clear) {
       var client = publicClient()
       var pair = 't' + joinProduct(opts.product_id)
       client.ticker(pair, function (err, body) {
-        if (err) return retry('getQuote', func_args, err)
+        if (err) return retry('getQuote', func_args)
         cb(null, { bid: String(body.BID), ask: String(body.ASK) })
       })
     },
 
     cancelOrder: function (opts, cb) {
+      var func_args = [].slice.call(arguments)
       var client = authedClient()
       client.cancel_order(opts.order_id, function (err, body) {
-        cb(err)
+        if (err) cb(err)
+        cb()
       })
     },
 
     buy: function (opts, cb) {
+      var func_args = [].slice.call(arguments)
       var client = authedClient()
       if (opts.order_type === 'maker' && typeof opts.type === 'undefined') {
         opts.type = 'exchange limit'
@@ -161,8 +166,8 @@ module.exports = function container (get, set, clear) {
           ordertype: opts.order_type
         }
         if (err && err.toString('Error: Invalid order: not enough exchange balance')) {
-          status: 'rejected'
-          reject_reason: 'balance'
+          order.status = 'rejected'
+          order.reject_reason = 'balance'
           return cb(null, order)
         }
         if (err) return (err)
@@ -211,8 +216,8 @@ module.exports = function container (get, set, clear) {
           ordertype: opts.order_type
         }
         if (err && err.toString('Error: Invalid order: not enough exchange balance')) {
-          status: 'rejected'
-          reject_reason: 'balance'
+          order.status = 'rejected'
+          order.reject_reason = 'balance'
           return cb(null, order)
         }
         if (err) return (err)
@@ -222,13 +227,13 @@ module.exports = function container (get, set, clear) {
     },
 
     getOrder: function (opts, cb) {
+      var func_args = [].slice.call(arguments)
       var order = orders['~' + opts.order_id]
       var client = authedClient()
       client.order_status(opts.order_id, function (err, body) {
-        if (err) return (err)
-        if (!body.id) {
-          return cb('Order not found')
-        }
+        if (err) return retry('getTrades', func_args)
+        if (!body || !body.id) return cb('Order not found')
+
         if (body.is_cancelled === true && body.is_live === false) {
           order.status = 'rejected'
           order.reject_reason = 'post only'
