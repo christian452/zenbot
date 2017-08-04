@@ -1,11 +1,17 @@
 var QuadrigaCX = require('quadrigacx'),
   path = require('path'),
+  minimist = require('minimist'),
   moment = require('moment'),
   colors = require('colors'),
   n = require('numbro')
 
 module.exports = function container (get, set, clear) {
   var c = get('conf')
+  var s = {
+    options: minimist(process.argv)
+  }
+  var so = s.options
+
   var shownWarnings = false
 
   var public_client, authed_client
@@ -44,6 +50,10 @@ module.exports = function container (get, set, clear) {
     }, 30000)
   }
 
+  function debugOut(msg) {
+    if (so.debug) console.log(msg)
+  }
+
   var orders = {}
 
   var exchange = {
@@ -67,12 +77,12 @@ module.exports = function container (get, set, clear) {
       client.api('transactions', args, function (err, body) {
         if (!shownWarnings) {
           console.log('please note: the quadriga api does not support backfilling.')
-          console.log('please note: periods should be set to 1h or less.');
+          console.log('please note: periods should be set to 1h or less.')
           shownWarnings = true
         }
 
         if (err) return retry('getTrades', func_args, err)
-        if (body.error) return retry('getTrades', func_args, trades.error)
+        if (body.error) return retry('getTrades', func_args, body.error)
 
         var trades = body.filter(t => {
           return (typeof opts.from === 'undefined') ? true : (moment.unix(t.date).valueOf() > opts.from)
@@ -91,10 +101,11 @@ module.exports = function container (get, set, clear) {
     },
 
     getBalance: function (opts, cb) {
+      var func_args = [].slice.call(arguments)
       var client = authedClient()
       client.api('balance', function (err, wallet) {
-        if (err) return retry('getBalance', null, err)
-        if (wallet.error) return retry('getBalance', null, wallet.error)
+        if (err) return retry('getBalance', func_args, err)
+        if (wallet.error) return retry('getBalance', func_args, wallet.error)
 
         var currency = opts.currency.toLowerCase()
         var asset = opts.asset.toLowerCase()
@@ -104,11 +115,16 @@ module.exports = function container (get, set, clear) {
           currency: 0
         }
 
-        balance.currency = Number(wallet[currency + '_balance']);
-        balance.asset = Number(wallet[asset + '_balance']);
+        balance.currency = n(wallet[currency + '_balance']).format(0.00)
+        balance.asset = n(wallet[asset + '_balance']).format(0.00)
 
-        balance.currency_hold = Number(wallet[currency + '_reserved'])
-        balance.asset_hold = Number(wallet[asset + '_reserved'])
+        balance.currency_hold = n(wallet[currency + '_reserved']).format(0.00000000)
+        balance.asset_hold = n(wallet[asset + '_reserved']).format(0.00000000)
+
+        debugOut(`Balance/Reserve/Hold:`)
+        debugOut(`  ${currency} (${wallet[currency + '_balance']}/${wallet[currency + '_reserved']}/${wallet[currency + '_available']})`)
+        debugOut(`  ${asset} (${wallet[asset + '_balance']}/${wallet[asset + '_reserved']}/${wallet[asset + '_available']})`)
+
         cb(null, balance)
       })
     },
@@ -126,8 +142,8 @@ module.exports = function container (get, set, clear) {
         if (quote.error) return retry('getQuote', func_args, quote.error)
 
         var r = {
-          bid: Number(quote.bid),
-          ask: Number(quote.ask)
+          bid: String(quote.bid),
+          ask: String(quote.ask)
         }
 
         cb(null, r)
@@ -139,6 +155,8 @@ module.exports = function container (get, set, clear) {
       var params = {
         id: opts.order_id
       }
+
+      debugOut(`Cancelling order ${opts.order_id}`)
 
       var client = authedClient()
       client.api('cancel_order', params, function (err, body) {
@@ -158,6 +176,8 @@ module.exports = function container (get, set, clear) {
         params.price = n(opts.price).format('0.00')
       }
 
+      debugOut(`Requesting ${opts.order_type} buy for ${opts.size} assets`)
+
       var client = authedClient()
       client.api('buy', params, function (err, body) {
         var order = {
@@ -171,10 +191,7 @@ module.exports = function container (get, set, clear) {
         }
 
         if (err) return cb(err)
-        if (body.error) {
-          //console.log(`API Error: ${body.error.message}`);
-          return cb(body.error)
-        }
+        if (body.error) return cb(body.error)
 
         if (opts.order_type === 'taker') {
           order.status = 'done'
@@ -197,6 +214,8 @@ module.exports = function container (get, set, clear) {
           }
         }
 
+        debugOut(`    Purchase ID: ${body.id}`)
+
         order.id = body.id
         orders['~' + body.id] = order
         cb(null, order)
@@ -213,6 +232,8 @@ module.exports = function container (get, set, clear) {
         params.price = n(opts.price).format('0.00')
       }
 
+      debugOut(`Requesting ${opts.order_type} sell for ${opts.size} assets`)
+
       var client = authedClient()
       client.api('sell', params, function (err, body) {
         var order = {
@@ -226,10 +247,7 @@ module.exports = function container (get, set, clear) {
         }
 
         if (err) return cb(err)
-        if (body.error) {
-          //console.log(`API Error: ${body.error.message}`);
-          return cb(body.error)
-        }
+        if (body.error) return cb(body.error)
 
         if (opts.order_type === 'taker') {
           order.status = 'done'
@@ -241,7 +259,7 @@ module.exports = function container (get, set, clear) {
             var order_count = body.orders_matched.length
             for (var idx = 0; idx < order_count; idx++) {
               asset_total = asset_total + Number(body.orders_matched[idx].amount)
-              price_total = price_total + (Number(body.orders_matched[idx].amount) * body.orders_matched[idx].price)
+              price_total = price_total + (Number(body.orders_matched[idx].amount) * Number(body.orders_matched[idx].price))
             }
 
             order.price = price_total / asset_total
@@ -251,6 +269,8 @@ module.exports = function container (get, set, clear) {
             order.size = Number(body.amount)
           }
         }
+
+        debugOut(`    Sell ID: ${body.id}`)
 
         order.id = body.id
         orders['~' + body.id] = order
@@ -267,17 +287,17 @@ module.exports = function container (get, set, clear) {
       var client = authedClient()
       client.api('lookup_order', params, function (err, body) {
         if (err) return cb(err)
-        if (body.error) {
-          //console.log(`API Error: ${body.error.message}`);
-          return cb(body.error)
-        }
+        if (body.error) return cb(body.error)
 
-        if (body.status === 2) {
+        if (body[0].status === 2) {
           order.status = 'done'
           order.done_at = new Date().getTime()
-          order.filled_size = Number(body.amount)
+          order.filled_size = Number(body[0].amount)
           return cb(null, order)
         }
+
+        debugOut(`Lookup order ${opts.order_id} status is ${body.status}`)
+
         cb(null, order)
       })
     },
