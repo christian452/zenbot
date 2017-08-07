@@ -78,16 +78,16 @@ const processOutput = (output, command) => {
   const errRegexp = /error rate: (.*)%/g
 
   const output2 = output.substr(output.length - 3000)
-
   const rawParams = jsonRegexp.exec(output2)[1]
   const params = JSON.parse(rawParams)
   const endBalance = endBalRegexp.exec(output2)[1]
   const buyHold = buyHoldRegexp.exec(output2)[1]
   const vsBuyHold = vsBuyHoldRegexp.exec(output2)[1]
   const wlMatch = wlRegexp.exec(output2)
-  const wins = parseInt(wlMatch[1])
-  const losses = parseInt(wlMatch[2])
-  const errorRate = errRegexp.exec(output2)[1]
+  const errMatch = errRegexp.exec(output2);
+  const wins = wlMatch !== null ? parseInt(wlMatch[1]) : 0;
+  const losses = wlMatch !== null ? parseInt(wlMatch[2]) : 0;
+  const errorRate = errMatch !== null ? parseInt(errMatch[1]) : 0;
   const days = parseInt(params.days)
 
   const roi = roundp(
